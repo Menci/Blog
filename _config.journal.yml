@@ -1,0 +1,24 @@
+sidebar_title: "Menci's Blog"
+sidebar_subtitle: "念念不忘，必有回响"
+toc: true
+menu:
+    归档: /archives/
+    标签: /tags/
+    朋友们: /friends/
+    关于我: /about-me/
+cdn:
+    libs: unpkg:https://code.bdstatic.com/npm
+    fonts: https://cdn.menci.xyz/fonts
+hljsTheme: null
+giscus:
+    app: https://giscus.api.menci.xyz/client.js
+    repo: Menci/blog
+    repo-id: R_kgDOGsK5nA
+    category: Comments
+    category-id: DIC_kwDOGsK5nM4CAulO
+    mapping: pathname
+    reactions-enabled: 1
+    emit-metadata: 0
+    theme: menci
+    lang: zh-CN
+googleAnalytics: G-N928RHHV24

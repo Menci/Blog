@@ -1,0 +1,117 @@
+name: Build & Deploy
+
+on:
+  push:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: The ref of blog content repo.
+        required: false
+        default: main
+
+env:
+  PROJECT_NAME: menci-blog
+
+  REPO_CONTENT: Menci/blog-content
+  REPO_TARGET: MenciStaticSites/blog
+
+  THEME_REPO: Menci/hexo-theme-journal
+  THEME_NAME: journal
+  THEME_BRANCH: menci
+
+jobs:
+  build_deploy:
+    name: Build & Deploy
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+    - name: Checkout Theme
+      uses: actions/checkout@v2
+      with:
+        repository: ${{ env.THEME_REPO }}
+        ref: ${{ env.THEME_BRANCH }}
+        path: themes/${{ env.THEME_NAME }}
+    - name: Checkout Content
+      uses: actions/checkout@v2
+      with:
+        repository: ${{ env.REPO_CONTENT }}
+        ref: ${{ github.event_name == 'push' && 'main' || github.event.inputs.ref }}
+        ssh-key: ${{ secrets.DEPLOY_KEY_CONTENT }}
+        path: source
+    - name: Setup Node
+      uses: actions/setup-node@v2
+      with:
+        node-version: 16.x
+    - name: Cache node_modules
+      uses: actions/cache@v2
+      id: cache
+      with:
+        path: node_modules
+        key: ${{ runner.os }}-node-${{ hashFiles('yarn.lock') }}
+        restore-keys: ${{ runner.os }}-node-
+    - name: Install Dependencies
+      if: steps.cache.outputs.cache-hit != 'true'
+      run: yarn install --production --frozen-lockfile
+    - name: Build
+      run: yarn hexo g
+    - name: Inject Service Worker
+      uses: Menci/service-worker-redirect-origin@main
+      with:
+        www-root: public
+        target-base-url: https://cdn-static.menci.xyz/${{ env.PROJECT_NAME }}/
+    - name: Push to GitHub
+      id: commit-push
+      run: |
+        pushd source/_posts
+        git config --global user.name $(git show -s --format='%an' HEAD)
+        git config --global user.email $(git show -s --format='%ae' HEAD)
+        popd
+
+        cd public
+        git init && git add .
+        git commit -m "Upload site on $(date '+%Y-%m-%d %H:%M:%S')"
+        git branch -m main
+        git remote add origin git@github.com:${{ env.REPO_TARGET }}
+        eval `ssh-agent -s`
+        echo "$SSH_KEY" | tr -d '\r' | ssh-add -
+        git push -f origin main
+
+        echo "::set-output commit-hash=$(git rev-parse HEAD)"
+
+        rm -rf .git
+      env:
+        SSH_KEY: ${{ secrets.DEPLOY_KEY_TARGET }}
+    - name: Wait for Cloudflare Pages Deployment
+      uses: Menci/cf-pages-await@main
+      with:
+        accountEmail: ${{ secrets.CLOUDFLARE_ACCOUNT_EMAIL }}
+        apiKey: ${{ secrets.CLOUDFLARE_API_KEY }}
+        accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        project: ${{ env.PROJECT_NAME }}
+        commitHash: ${{ steps.commit-push.outputs.commit-hash }}
+      continue-on-error: true
+    - name: Deploy to Aliyun OSS
+      uses: Menci/upload-to-oss@main
+      with:
+        access-key-id: ${{ secrets.ALIYUN_ACCESS_KEY_ID }}
+        access-key-secret: ${{ secrets.ALIYUN_ACCESS_KEY_SECRET }}
+        bucket: ${{ secrets.ALIYUN_OSS_BUCKET }}
+        endpoint: ${{ secrets.ALIYUN_OSS_ENDPOINT }}
+        local-path: public
+        remote-path: ${{ env.PROJECT_NAME }}
+        headers: |
+          filename => (
+            {
+              "Cache-Control": `public, max-age=${filename.endsWith(".html") ? 60 : 604800}`
+            }
+          )
+        delay-html-file-upload: true
+    - name: Deploy to Azure
+      uses: Azure/static-web-apps-deploy@v1
+      with:
+        azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}
+        action: upload
+        app_location: public
+        skip_app_build: true
+        config_file_location: .

@@ -159,7 +159,7 @@ hexo.extend.filter.register(
               const resolvedFileUrl = new URL(uri, htmlFileFileUrl);
               const resolvedPath = url.fileURLToPath(resolvedFileUrl).slice(1);
               const mappedPath = fileMap.has(resolvedPath) ? fileMap.get(resolvedPath) : resolvedPath;
-              uri = (cdn ? cdnRoot : "/") + mappedPath;
+              uri = (cdn ? cdnRoot : "/") + mappedPath + resolvedFileUrl.hash;
             }
 
             if (!isRunningServer && uri.toLowerCase().startsWith("https://")) {

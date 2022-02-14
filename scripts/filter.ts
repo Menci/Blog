@@ -190,7 +190,7 @@ hexo.extend.filter.register(
 
         processTag("script", "src");
         processTag("link", "href");
-        processTag("a", "href", false);
+        processTag("a[data-fancybox]", "href");
         processTag("img", "src");
 
         hexo.route.set(

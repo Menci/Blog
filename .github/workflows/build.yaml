@@ -1,5 +1,9 @@
 name: Build & Deploy
 
+concurrency: 
+  group: build_deploy
+  cancel-in-progress: true
+
 on:
   push:
   workflow_dispatch:

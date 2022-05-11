@@ -13,8 +13,37 @@ const markdownIt = new MarkdownIt({
   breaks: false,
   linkify: true,
   typographer: false,
-  highlight: (code, language) => syntect.highlight(code, language, "h-").html
+  highlight
 });
+
+function highlight(code: string, language: string) {
+  // Process [shell]-prompt highlight
+  let linePrompts: string[] = null;
+  if (language.endsWith("-prompt")) {
+    // Remove prompts from input
+    const PROMPTS = ["$ ", "# "];
+    language = language.split("-").slice(0, -1).join("-");
+    linePrompts = code.split("\n").map(line => PROMPTS.find(prompt => line.startsWith(prompt)) || "");
+    code = code
+      .split("\n")
+      .map((line, i) => line.slice(linePrompts[i].length))
+      .join("\n");
+  }
+
+  let html = syntect.highlight(code, language, "h-").html;
+
+  if (linePrompts) {
+    // Add the stylized prompts back with unselectable pseudo elements
+    html = html
+      .split("\n")
+      .map((line, i) =>
+        !linePrompts[i] ? line : `<span class="hl-sh-prompt" data-prompt="${linePrompts[i]}"></span>${line}`
+      )
+      .join("\n");
+  }
+
+  return html;
+}
 
 function renderMath(code: string, display: boolean) {
   return katex.renderToString(code, {

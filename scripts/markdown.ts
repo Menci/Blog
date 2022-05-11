@@ -142,6 +142,17 @@ hexo.extend.renderer.register(
       }
     });
 
+    // Workaround Vue template's syntex conflict
+    document.querySelectorAll("*:not(script):not(style):not(:empty)").forEach(element => {
+      element.childNodes.forEach(node => {
+        if (node.nodeType === NodeType.TEXT_NODE) {
+          while (node.rawText.includes("{{")) {
+            node.rawText = node.rawText.split("{{").join("{<span></span>{");
+          }
+        }
+      });
+    });
+
     return document.outerHTML;
   })
 );

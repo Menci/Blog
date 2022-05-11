@@ -150,7 +150,12 @@ hexo.extend.filter.register(
 
         const document = parse(await streamToString(hexo.route.get(relativePath)), { comment: true });
 
-        const processTag = (selector: string, attributeName: string, cdn = !isRunningServer) => {
+        const processTag = (
+          selector: string,
+          attributeName: string,
+          border?: [string, string],
+          cdn = !isRunningServer
+        ) => {
           const processUri = (uri: string) => {
             if (!uri) return uri;
 
@@ -169,9 +174,19 @@ hexo.extend.filter.register(
             return uri;
           };
 
+          const removeBorder = (value: string) => {
+            if (!border) return value;
+
+            const [prefix, suffix] = border;
+            if (!value.startsWith(prefix) && value.endsWith(suffix)) return null;
+            return value.slice(prefix.length, -suffix.length);
+          };
+
+          const addBorder = (uri: string) => (border ? border[0] + uri + border[1] : uri);
+
           document.querySelectorAll(selector).map(element => {
-            const uri = element.getAttribute(attributeName);
-            if (uri) element.setAttribute(attributeName, processUri(uri));
+            const uri = removeBorder(element.getAttribute(attributeName));
+            if (uri) element.setAttribute(attributeName, addBorder(processUri(uri)));
 
             // Process srcset for <img>s
             if (element.tagName === "IMG" && element.hasAttribute("srcset")) {
@@ -192,6 +207,7 @@ hexo.extend.filter.register(
         processTag("link", "href");
         processTag("a[data-fancybox]", "href");
         processTag("img", "src");
+        processTag("div.post-head-wrapper, div.post-item-image", "style", ["background-image: url('", "')"]);
 
         hexo.route.set(
           relativePath,

@@ -40,6 +40,8 @@ markdownIt.use(MarkdownItAnchor, {
   })
 });
 
+markdownIt.linkify.set({ fuzzyLink: false });
+
 const disableNunjucks = <F>(func: F): F => Object.assign(func, { disableNunjucks: true });
 
 hexo.extend.renderer.register(

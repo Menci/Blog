@@ -204,7 +204,7 @@ hexo.extend.filter.register(
         };
 
         processTag("script", "src");
-        processTag("link", "href");
+        processTag("link:not([type='application/atom+xml'])", "href");
         processTag("a[data-fancybox]", "href");
         processTag("img", "src");
         processTag("div.post-head-wrapper, div.post-item-image", "style", ["background-image: url('", "')"]);

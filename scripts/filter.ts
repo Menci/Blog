@@ -90,7 +90,7 @@ hexo.extend.filter.register("after_post_render", data => {
   data.excerpt = document.outerHTML;
 });
 
-const isRunningServer = hexo.env["cmd"] === "s";
+const isRunningServer = hexo.env["cmd"].startsWith('s');
 hexo.extend.filter.register(
   "after_generate",
   async () => {

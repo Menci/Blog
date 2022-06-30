@@ -153,25 +153,28 @@ hexo.extend.filter.register(
         const processTag = (
           selector: string,
           attributeName: string,
+          addCrossOrigin: boolean,
           border?: [string, string],
           cdn = !isRunningServer
         ) => {
-          const processUri = (uri: string) => {
-            if (!uri) return uri;
+          const processUri = (uri: string): [uri: string, cdnApplied: boolean] => {
+            if (!uri) return [uri, false];
 
+            let cdnApplied = false;
             if (isRelativeUrl(uri)) {
               // Resolve referenced asset file's path
               const resolvedFileUrl = new URL(uri, htmlFileFileUrl);
               const resolvedPath = url.fileURLToPath(resolvedFileUrl).slice(1);
               const mappedPath = fileMap.has(resolvedPath) ? fileMap.get(resolvedPath) : resolvedPath;
               uri = (cdn ? cdnRoot : "/") + mappedPath + resolvedFileUrl.hash;
+              cdnApplied = cdn;
             }
 
             if (!isRunningServer && uri.toLowerCase().startsWith("https://")) {
               uri = uri.slice(6);
             }
 
-            return uri;
+            return [uri, cdnApplied];
           };
 
           const removeBorder = (value: string) => {
@@ -186,7 +189,8 @@ hexo.extend.filter.register(
 
           document.querySelectorAll(selector).map(element => {
             const uri = removeBorder(element.getAttribute(attributeName));
-            if (uri) element.setAttribute(attributeName, addBorder(processUri(uri)));
+            let [processedUri, cdnApplied] = processUri(uri);
+            if (processedUri) element.setAttribute(attributeName, addBorder(processedUri));
 
             // Process srcset for <img>s
             if (element.tagName === "IMG" && element.hasAttribute("srcset")) {
@@ -196,18 +200,24 @@ hexo.extend.filter.register(
                 .map(s => s.trim())
                 .map(s => s.split(" ").filter(s => s)) as [uri: string, descriptor: string][];
               for (const src of srcset) {
-                src[0] = processUri(src[0]);
+                src[0] = processUri(src[0])[0];
               }
               element.setAttribute("srcset", srcset.map(src => src.join(" ")).join(","));
+            }
+
+            if (cdnApplied && addCrossOrigin) {
+              element.setAttribute("crossorigin", "anonymous");
             }
           });
         };
 
-        processTag("script", "src");
-        processTag("link:not([type='application/atom+xml'])", "href");
-        processTag("a[data-fancybox]", "href");
-        processTag("img", "src");
-        processTag("div.post-head-wrapper, div.post-item-image", "style", ["background-image: url('", "')"]);
+        processTag("script", "src", true);
+        processTag("link:not([type='application/atom+xml'])", "href", true);
+        processTag("a[data-fancybox]", "href", false);
+        processTag("img", "src", true);
+
+        // TODO
+        processTag("div.post-head-wrapper, div.post-item-image", "style", false, ["background-image: url('", "')"]);
 
         hexo.route.set(
           relativePath,

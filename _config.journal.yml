@@ -21,4 +21,6 @@ giscus:
     emit-metadata: 0
     theme: menci
     lang: zh-CN
-googleAnalytics: G-N928RHHV24
+plausible:
+    domain: blog.men.ci
+    script: https://stat.u.sb/js/plausible.js

@@ -59,14 +59,15 @@ jobs:
       if: steps.cache.outputs.cache-hit != 'true'
       run: yarn install --production --frozen-lockfile
     - name: Build
-      run: yarn hexo g
+      run: |
+        yarn hexo g
+        cp _headers public/
     - name: Inject Service Worker
       uses: Menci/service-worker-redirect-origin@main
       with:
         www-root: public
         target-base-url: https://cdn-static.menci.xyz/${{ env.PROJECT_NAME }}/
     - name: Push to GitHub
-      id: commit-push
       run: |
         pushd source/_posts
         git config --global user.name $(git show -s --format='%an' HEAD)
@@ -82,20 +83,17 @@ jobs:
         echo "$SSH_KEY" | tr -d '\r' | ssh-add -
         git push -f origin main
 
-        echo "::set-output commit-hash=$(git rev-parse HEAD)"
-
         rm -rf .git
       env:
         SSH_KEY: ${{ secrets.DEPLOY_KEY_TARGET }}
-    - name: Wait for Cloudflare Pages Deployment
-      uses: Menci/cf-pages-await@main
+    - name: Deploy to Cloudflare Pages
+      uses: Menci/pages-action@main
       with:
-        accountEmail: ${{ secrets.CLOUDFLARE_ACCOUNT_EMAIL }}
-        apiKey: ${{ secrets.CLOUDFLARE_API_KEY }}
+        apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
         accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-        project: ${{ env.PROJECT_NAME }}
-        commitHash: ${{ steps.commit-push.outputs.commit-hash }}
-      continue-on-error: true
+        projectName: ${{ env.PROJECT_NAME }}
+        directory: public
+        branch: main
     - name: Deploy to Static CDN
       uses: AyaInfra/StaticCDNDeploy@main
       with:

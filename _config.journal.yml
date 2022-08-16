@@ -7,7 +7,7 @@ menu:
     朋友们: /friends/
     关于我: /about-me/
 cdn:
-    libs: unpkg:https://code.bdstatic.com/npm
+    libs: cdnjs:https://cdnjs.baoshuo.ren/ajax/libs
     fonts: https://cdn.menci.xyz/fonts
 hljsTheme: null
 giscus:

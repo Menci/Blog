@@ -19,7 +19,7 @@ giscus:
     mapping: pathname
     reactions-enabled: 1
     emit-metadata: 0
-    theme: menci
+    theme: menci-blog
     lang: zh-CN
 plausible:
     domain: blog.men.ci

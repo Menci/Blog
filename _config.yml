@@ -94,4 +94,4 @@ theme: journal
 deploy:
   type: ''
 
-cdn_root: https://cdn-static.menci.xyz/menci-blog/
+cdn_root: https://static.cdn.menci.xyz/menci-blog/

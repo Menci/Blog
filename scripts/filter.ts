@@ -63,15 +63,27 @@ const processFriendsPageImage = async (fileName: string, fileContent: Buffer): P
 };
 
 const processSvg = (data: Buffer) => {
-  const result = svgo.optimize(data, {
+  const result = svgo.optimize(data.toString("utf-8"), {
+    multipass: true,
     plugins: [
-      "preset-default",
+      {
+        name: "preset-default",
+        params: {
+          overrides: {
+            collapseGroups: false,
+            removeEmptyContainers: false
+          }
+        }
+      },
       {
         name: "sortAttrs",
         params: {
           xmlnsOrder: "alphabetical"
         } as any
-      }
+      },
+      "convertStyleToAttrs",
+      "reusePaths",
+      "removeUnknownsAndDefaults"
     ]
   });
   if ("data" in result) {

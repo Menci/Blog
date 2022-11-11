@@ -1,27 +1,17 @@
 diff --git a/node_modules/hexo/lib/hexo/index.js b/node_modules/hexo/lib/hexo/index.js
-index 578cefe..2776bca 100644
+index 30a1f78..b90704a 100644
 --- a/node_modules/hexo/lib/hexo/index.js
 +++ b/node_modules/hexo/lib/hexo/index.js
-@@ -6,9 +6,6 @@ const tildify = require('tildify');
- const Database = require('warehouse');
- const { magenta, underline } = require('picocolors');
- const { EventEmitter } = require('events');
--const { readFile } = require('hexo-fs');
--const Module = require('module');
--const { runInThisContext } = require('vm');
- const { version } = require('../../package.json');
- const logger = require('hexo-log');
- const { Console, Deployer, Filter, Generator, Helper, Injector, Migrator, Processor, Renderer, Tag } = require('../extend');
-@@ -26,6 +23,8 @@ const multiConfigPath = require('./multi_config_path');
- const { sync } = require('resolve');
+@@ -26,6 +26,8 @@ const multiConfigPath = require('./multi_config_path');
  const { deepMerge, full_url_for } = require('hexo-util');
+ let resolveSync; // = require('resolve');
  
 +require("@swc-node/register");
 +
  const libDir = dirname(__dirname);
  const dbVersion = 1;
  
-@@ -97,6 +96,8 @@ class Hexo extends EventEmitter {
+@@ -97,6 +99,8 @@ class Hexo extends EventEmitter {
    constructor(base = process.cwd(), args = {}) {
      super();
  
@@ -30,7 +20,7 @@ index 578cefe..2776bca 100644
      this.base_dir = base + sep;
      this.public_dir = join(base, 'public') + sep;
      this.source_dir = join(base, 'source') + sep;
-@@ -275,28 +276,7 @@ class Hexo extends EventEmitter {
+@@ -282,28 +286,7 @@ class Hexo extends EventEmitter {
    }
  
    loadPlugin(path, callback) {

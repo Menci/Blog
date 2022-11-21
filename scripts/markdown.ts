@@ -19,11 +19,17 @@ const markdownIt = new MarkdownIt({
 function highlight(code: string, language: string) {
   // Process [shell]-prompt highlight
   let linePrompts: string[] = null;
+  let lineContinuation: boolean[] = null;
   if (language.endsWith("-prompt")) {
     // Remove prompts from input
     const PROMPTS = ["$ ", "# "];
     language = language.split("-").slice(0, -1).join("-");
-    linePrompts = code.split("\n").map(line => PROMPTS.find(prompt => line.startsWith(prompt)) || "");
+    const codeLines = code.split("\n");
+    linePrompts = codeLines.map(line => PROMPTS.find(prompt => line.startsWith(prompt)) || "");
+    lineContinuation = linePrompts.map(s => !!s);
+    for (let i = 1; i < lineContinuation.length; i++) {
+      if (codeLines[i - 1].endsWith("\\")) lineContinuation[i] ||= lineContinuation[i - 1];
+    }
     code = code
       .split("\n")
       .map((line, i) => line.slice(linePrompts[i].length))
@@ -33,13 +39,26 @@ function highlight(code: string, language: string) {
   let html = syntect.highlight(code, language, "h-").html;
 
   if (linePrompts) {
+    function toPlain(html: string) {
+      const d1 = parse(html);
+      if (!d1.firstChild) return html;
+      const d2 = parse("<span></span>");
+      d2.firstChild.textContent = d1.textContent;
+      return d2.innerHTML;
+    }
+
     // Add the stylized prompts back with unselectable pseudo elements
-    html = html
+    const document = parse(html);
+    const outerSpan = document.firstChild as HTMLElement;
+    outerSpan.innerHTML = outerSpan.innerHTML
       .split("\n")
-      .map((line, i) =>
-        !linePrompts[i] ? line : `<span class="hl-sh-prompt" data-prompt="${linePrompts[i]}"></span>${line}`
-      )
+      .map((line, i) => {
+        if (linePrompts[i]) return `<span class="hl-sh-prompt" data-prompt="${linePrompts[i]}"></span>${line}`;
+        else if (lineContinuation[i]) return line;
+        else return toPlain(line);
+      })
       .join("\n");
+    html = document.innerHTML;
   }
 
   return html;

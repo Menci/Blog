@@ -30,26 +30,26 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
     - name: Checkout Theme
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
       with:
         repository: ${{ env.THEME_REPO }}
         ref: ${{ env.THEME_BRANCH }}
         path: themes/${{ env.THEME_NAME }}
     - name: Checkout Content
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
       with:
         repository: ${{ env.REPO_CONTENT }}
         ref: ${{ github.event_name == 'push' && 'main' || github.event.inputs.ref }}
         ssh-key: ${{ secrets.DEPLOY_KEY_CONTENT }}
         path: source
     - name: Setup Node
-      uses: actions/setup-node@v2
+      uses: actions/setup-node@v3
       with:
         node-version: 16.x
     - name: Cache node_modules
-      uses: actions/cache@v2
+      uses: actions/cache@v3
       id: cache
       with:
         path: node_modules

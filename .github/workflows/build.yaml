@@ -108,7 +108,3 @@ jobs:
         app_location: public
         skip_app_build: true
         config_file_location: .
-    - name: Submit Sitemap
-      uses: atymic/sitemap-ping-action@master
-      with:
-          sitemap-url: ${{ env.SITE_ROOT }}/sitemap.xml

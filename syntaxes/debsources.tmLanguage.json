@@ -1,0 +1,66 @@
+{
+	"$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+	"name": "debsources",
+	"patterns": [
+		{
+			"include": "#keywords"
+		},
+		{
+			"include": "#strings"
+		}
+	],
+	"repository": {
+		"keywords": {
+			"patterns": [{
+				"name": "keyword.control.debsources",
+				"match": "\\b(deb-src|deb|main|contrib|non-free|restricted|universe|multiverse|partner)\\b"
+			},
+			{
+				"name": "keyword.other.debsources",
+				"match": "\\b(oldstable|stable|testing|unstable|experimental|devel|jessie|stretch|buster|sid|rc-buggy|trusty|xenial|bionic|eoan|focal|groovy)(-(updates|security|backports|proposed))?\\b",
+				"comment": "Supported versions"
+			},
+			{
+				"name": "invalid.deprecated.debsources",
+				"match": "\\b(buzz|rex|bo|hamm|slink|potato|woody|sarge|etch|lenny|squeeze|warty|hoary|breezy|dapper|edgy|feisty|gutsy|hardy|intrepid|jaunty|karmic|lucid|maverick|natty|oneiric|precise|quantal|raring|saucy|utopic|vivid|wily|yakkety|zesty|artful|cosmic|disco)(-(updates|security|backports))?\\b",
+				"comment": "Unsupported versions"
+			},
+			{
+				"name":"entity.other.attribute-name.debsources",
+				"match": "\\b(arch|lang|trusted|target|pdiffs|by-hash|allow-inscure|signed-by|check-valid-until|valid-until-min|valid-until-max|check-date|date-max-future|inrelease-path)\\b",
+				"comment": "This is for deb and deb-src options."
+			},
+			{
+				"name": "entity.name.class.debsources",
+				"match": "\\b((uclibc-linux-armel|uclibc-linux-i386|uclibc-linux-ia64|uclibc-linux-alpha|uclibc-linux-amd64|uclibc-linux-armeb|uclibc-linux-arm|uclibc-linux-arm64|uclibc-linux-avr32|uclibc-linux-hppa|uclibc-linux-m32r|uclibc-linux-m68k|uclibc-linux-mips|uclibc-linux-mipsel|uclibc-linux-mipsr6|uclibc-linux-mipsr6el|uclibc-linux-mips64|uclibc-linux-mips64el|uclibc-linux-mips64r6|uclibc-linux-mips64r6el|uclibc-linux-nios2|uclibc-linux-or1k|uclibc-linux-powerpc|uclibc-linux-powerpcel|uclibc-linux-ppc64|uclibc-linux-ppc64el|uclibc-linux-riscv64|uclibc-linux-s390|uclibc-linux-s390x|uclibc-linux-sh3|uclibc-linux-sh3eb|uclibc-linux-sh4|uclibc-linux-sh4eb|uclibc-linux-sparc|uclibc-linux-sparc64|uclibc-linux-tilegx|musl-linux-armhf|musl-linux-i386|musl-linux-ia64|musl-linux-alpha|musl-linux-amd64|musl-linux-armeb|musl-linux-arm|musl-linux-arm64|musl-linux-avr32|musl-linux-hppa|musl-linux-m32r|musl-linux-m68k|musl-linux-mips|musl-linux-mipsel|musl-linux-mipsr6|musl-linux-mipsr6el|musl-linux-mips64|musl-linux-mips64el|musl-linux-mips64r6|musl-linux-mips64r6el|musl-linux-nios2|musl-linux-or1k|musl-linux-powerpc|musl-linux-powerpcel|musl-linux-ppc64|musl-linux-ppc64el|musl-linux-riscv64|musl-linux-s390|musl-linux-s390x|musl-linux-sh3|musl-linux-sh3eb|musl-linux-sh4|musl-linux-sh4eb|musl-linux-sparc|musl-linux-sparc64|musl-linux-tilegx|armhf|armel|mipsn32|mipsn32el|mipsn32r6|mipsn32r6el|mips64|mips64el|mips64r6|mips64r6el|powerpcspe|x32|arm64ilp32|i386|ia64|alpha|amd64|armeb|arm|arm64|avr32|hppa|m32r|m68k|mips|mipsel|mipsr6|mipsr6el|nios2|or1k|powerpc|powerpcel|ppc64|ppc64el|riscv64|s390|s390x|sh3|sh3eb|sh4|sh4eb|sparc|sparc64|tilegx|kfreebsd-armhf|kfreebsd-i386|kfreebsd-ia64|kfreebsd-alpha|kfreebsd-amd64|kfreebsd-armeb|kfreebsd-arm|kfreebsd-arm64|kfreebsd-avr32|kfreebsd-hppa|kfreebsd-m32r|kfreebsd-m68k|kfreebsd-mips|kfreebsd-mipsel|kfreebsd-mipsr6|kfreebsd-mipsr6el|kfreebsd-mips64|kfreebsd-mips64el|kfreebsd-mips64r6|kfreebsd-mips64r6el|kfreebsd-nios2|kfreebsd-or1k|kfreebsd-powerpc|kfreebsd-powerpcel|kfreebsd-ppc64|kfreebsd-ppc64el|kfreebsd-riscv64|kfreebsd-s390|kfreebsd-s390x|kfreebsd-sh3|kfreebsd-sh3eb|kfreebsd-sh4|kfreebsd-sh4eb|kfreebsd-sparc|kfreebsd-sparc64|kfreebsd-tilegx|knetbsd-i386|knetbsd-ia64|knetbsd-alpha|knetbsd-amd64|knetbsd-armeb|knetbsd-arm|knetbsd-arm64|knetbsd-avr32|knetbsd-hppa|knetbsd-m32r|knetbsd-m68k|knetbsd-mips|knetbsd-mipsel|knetbsd-mipsr6|knetbsd-mipsr6el|knetbsd-mips64|knetbsd-mips64el|knetbsd-mips64r6|knetbsd-mips64r6el|knetbsd-nios2|knetbsd-or1k|knetbsd-powerpc|knetbsd-powerpcel|knetbsd-ppc64|knetbsd-ppc64el|knetbsd-riscv64|knetbsd-s390|knetbsd-s390x|knetbsd-sh3|knetbsd-sh3eb|knetbsd-sh4|knetbsd-sh4eb|knetbsd-sparc|knetbsd-sparc64|knetbsd-tilegx|kopensolaris-i386|kopensolaris-ia64|kopensolaris-alpha|kopensolaris-amd64|kopensolaris-armeb|kopensolaris-arm|kopensolaris-arm64|kopensolaris-avr32|kopensolaris-hppa|kopensolaris-m32r|kopensolaris-m68k|kopensolaris-mips|kopensolaris-mipsel|kopensolaris-mipsr6|kopensolaris-mipsr6el|kopensolaris-mips64|kopensolaris-mips64el|kopensolaris-mips64r6|kopensolaris-mips64r6el|kopensolaris-nios2|kopensolaris-or1k|kopensolaris-powerpc|kopensolaris-powerpcel|kopensolaris-ppc64|kopensolaris-ppc64el|kopensolaris-riscv64|kopensolaris-s390|kopensolaris-s390x|kopensolaris-sh3|kopensolaris-sh3eb|kopensolaris-sh4|kopensolaris-sh4eb|kopensolaris-sparc|kopensolaris-sparc64|kopensolaris-tilegx|hurd-i386|hurd-ia64|hurd-alpha|hurd-amd64|hurd-armeb|hurd-arm|hurd-arm64|hurd-avr32|hurd-hppa|hurd-m32r|hurd-m68k|hurd-mips|hurd-mipsel|hurd-mipsr6|hurd-mipsr6el|hurd-mips64|hurd-mips64el|hurd-mips64r6|hurd-mips64r6el|hurd-nios2|hurd-or1k|hurd-powerpc|hurd-powerpcel|hurd-ppc64|hurd-ppc64el|hurd-riscv64|hurd-s390|hurd-s390x|hurd-sh3|hurd-sh3eb|hurd-sh4|hurd-sh4eb|hurd-sparc|hurd-sparc64|hurd-tilegx|darwin-i386|darwin-ia64|darwin-alpha|darwin-amd64|darwin-armeb|darwin-arm|darwin-arm64|darwin-avr32|darwin-hppa|darwin-m32r|darwin-m68k|darwin-mips|darwin-mipsel|darwin-mipsr6|darwin-mipsr6el|darwin-mips64|darwin-mips64el|darwin-mips64r6|darwin-mips64r6el|darwin-nios2|darwin-or1k|darwin-powerpc|darwin-powerpcel|darwin-ppc64|darwin-ppc64el|darwin-riscv64|darwin-s390|darwin-s390x|darwin-sh3|darwin-sh3eb|darwin-sh4|darwin-sh4eb|darwin-sparc|darwin-sparc64|darwin-tilegx|dragonflybsd-i386|dragonflybsd-ia64|dragonflybsd-alpha|dragonflybsd-amd64|dragonflybsd-armeb|dragonflybsd-arm|dragonflybsd-arm64|dragonflybsd-avr32|dragonflybsd-hppa|dragonflybsd-m32r|dragonflybsd-m68k|dragonflybsd-mips|dragonflybsd-mipsel|dragonflybsd-mipsr6|dragonflybsd-mipsr6el|dragonflybsd-mips64|dragonflybsd-mips64el|dragonflybsd-mips64r6|dragonflybsd-mips64r6el|dragonflybsd-nios2|dragonflybsd-or1k|dragonflybsd-powerpc|dragonflybsd-powerpcel|dragonflybsd-ppc64|dragonflybsd-ppc64el|dragonflybsd-riscv64|dragonflybsd-s390|dragonflybsd-s390x|dragonflybsd-sh3|dragonflybsd-sh3eb|dragonflybsd-sh4|dragonflybsd-sh4eb|dragonflybsd-sparc|dragonflybsd-sparc64|dragonflybsd-tilegx|freebsd-i386|freebsd-ia64|freebsd-alpha|freebsd-amd64|freebsd-armeb|freebsd-arm|freebsd-arm64|freebsd-avr32|freebsd-hppa|freebsd-m32r|freebsd-m68k|freebsd-mips|freebsd-mipsel|freebsd-mipsr6|freebsd-mipsr6el|freebsd-mips64|freebsd-mips64el|freebsd-mips64r6|freebsd-mips64r6el|freebsd-nios2|freebsd-or1k|freebsd-powerpc|freebsd-powerpcel|freebsd-ppc64|freebsd-ppc64el|freebsd-riscv64|freebsd-s390|freebsd-s390x|freebsd-sh3|freebsd-sh3eb|freebsd-sh4|freebsd-sh4eb|freebsd-sparc|freebsd-sparc64|freebsd-tilegx|netbsd-i386|netbsd-ia64|netbsd-alpha|netbsd-amd64|netbsd-armeb|netbsd-arm|netbsd-arm64|netbsd-avr32|netbsd-hppa|netbsd-m32r|netbsd-m68k|netbsd-mips|netbsd-mipsel|netbsd-mipsr6|netbsd-mipsr6el|netbsd-mips64|netbsd-mips64el|netbsd-mips64r6|netbsd-mips64r6el|netbsd-nios2|netbsd-or1k|netbsd-powerpc|netbsd-powerpcel|netbsd-ppc64|netbsd-ppc64el|netbsd-riscv64|netbsd-s390|netbsd-s390x|netbsd-sh3|netbsd-sh3eb|netbsd-sh4|netbsd-sh4eb|netbsd-sparc|netbsd-sparc64|netbsd-tilegx|openbsd-i386|openbsd-ia64|openbsd-alpha|openbsd-amd64|openbsd-armeb|openbsd-arm|openbsd-arm64|openbsd-avr32|openbsd-hppa|openbsd-m32r|openbsd-m68k|openbsd-mips|openbsd-mipsel|openbsd-mipsr6|openbsd-mipsr6el|openbsd-mips64|openbsd-mips64el|openbsd-mips64r6|openbsd-mips64r6el|openbsd-nios2|openbsd-or1k|openbsd-powerpc|openbsd-powerpcel|openbsd-ppc64|openbsd-ppc64el|openbsd-riscv64|openbsd-s390|openbsd-s390x|openbsd-sh3|openbsd-sh3eb|openbsd-sh4|openbsd-sh4eb|openbsd-sparc|openbsd-sparc64|openbsd-tilegx|aix-i386|aix-ia64|aix-alpha|aix-amd64|aix-armeb|aix-arm|aix-arm64|aix-avr32|aix-hppa|aix-m32r|aix-m68k|aix-mips|aix-mipsel|aix-mipsr6|aix-mipsr6el|aix-mips64|aix-mips64el|aix-mips64r6|aix-mips64r6el|aix-nios2|aix-or1k|aix-powerpc|aix-powerpcel|aix-ppc64|aix-ppc64el|aix-riscv64|aix-s390|aix-s390x|aix-sh3|aix-sh3eb|aix-sh4|aix-sh4eb|aix-sparc|aix-sparc64|aix-tilegx|solaris-i386|solaris-ia64|solaris-alpha|solaris-amd64|solaris-armeb|solaris-arm|solaris-arm64|solaris-avr32|solaris-hppa|solaris-m32r|solaris-m68k|solaris-mips|solaris-mipsel|solaris-mipsr6|solaris-mipsr6el|solaris-mips64|solaris-mips64el|solaris-mips64r6|solaris-mips64r6el|solaris-nios2|solaris-or1k|solaris-powerpc|solaris-powerpcel|solaris-ppc64|solaris-ppc64el|solaris-riscv64|solaris-s390|solaris-s390x|solaris-sh3|solaris-sh3eb|solaris-sh4|solaris-sh4eb|solaris-sparc|solaris-sparc64|solaris-tilegx|uclinux-armel|uclinux-i386|uclinux-ia64|uclinux-alpha|uclinux-amd64|uclinux-armeb|uclinux-arm|uclinux-arm64|uclinux-avr32|uclinux-hppa|uclinux-m32r|uclinux-m68k|uclinux-mips|uclinux-mipsel|uclinux-mipsr6|uclinux-mipsr6el|uclinux-mips64|uclinux-mips64el|uclinux-mips64r6|uclinux-mips64r6el|uclinux-nios2|uclinux-or1k|uclinux-powerpc|uclinux-powerpcel|uclinux-ppc64|uclinux-ppc64el|uclinux-riscv64|uclinux-s390|uclinux-s390x|uclinux-sh3|uclinux-sh3eb|uclinux-sh4|uclinux-sh4eb|uclinux-sparc|uclinux-sparc64|uclinux-tilegx|mnt-m68k))\\b",
+				"comment": "Obtained with `dpkg-architecture -L"
+			},
+			{
+				"name": "entity.name.class.debsources",
+				"match": "\\b(yes|no)\\b",
+				"comment": "This is for common option values."
+			},
+			{
+				"name": "string.html",
+				"match": "\\b(mirror\\+)?((cdrom|copy|file):[\\[]?[a-zA-Z0-9\\-._~!$&'()*+,;=/\\\\\\s\\w]+[\\]]?|[tor+]?https?:\/\/|ftp:\/\/|[rs]sh:\/\/|debtorrent:\/\/)[a-zA-Z0-9\\-._~!$&'()*+,;=\/\\\\]+"
+			},
+			{
+				"name": "comment.line",
+				"match": "#.*$"
+			}
+		]
+		},
+		"strings": {
+			"name": "string.quoted.double.debsources",
+			"begin": "\"",
+			"end": "\"",
+			"patterns": [
+				{
+					"name": "constant.character.escape.debsources",
+					"match": "\\\\."
+				}
+			]
+		}
+	},
+	"scopeName": "source.debsources"
+}

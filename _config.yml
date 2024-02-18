@@ -43,8 +43,7 @@ render_drafts: false
 post_asset_folder: true
 relative_link: true
 future: true
-highlight:
-  enable: false
+syntax_highlighter:
 
 # Home page setting
 # path: Root path for your blogs index page. (default = '')

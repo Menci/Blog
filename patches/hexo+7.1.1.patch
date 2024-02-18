@@ -1,0 +1,68 @@
+diff --git a/node_modules/hexo/dist/extend/renderer.d.ts b/node_modules/hexo/dist/extend/renderer.d.ts
+index ef2d43f..103f9b1 100644
+--- a/node_modules/hexo/dist/extend/renderer.d.ts
++++ b/node_modules/hexo/dist/extend/renderer.d.ts
+@@ -1,4 +1,3 @@
+-import Promise from 'bluebird';
+ import type { NodeJSLikeCallback } from '../types';
+ export interface StoreFunctionData {
+     path?: any;
+diff --git a/node_modules/hexo/dist/hexo/index.js b/node_modules/hexo/dist/hexo/index.js
+index 9bfce10..ce3d466 100644
+--- a/node_modules/hexo/dist/hexo/index.js
++++ b/node_modules/hexo/dist/hexo/index.js
+@@ -27,6 +27,7 @@ const load_database_1 = __importDefault(require("./load_database"));
+ const multi_config_path_1 = __importDefault(require("./multi_config_path"));
+ const hexo_util_1 = require("hexo-util");
+ let resolveSync; // = require('resolve');
++require("tsx/cjs");
+ const libDir = (0, path_1.dirname)(__dirname);
+ const dbVersion = 1;
+ const stopWatcher = (box) => { if (box.isWatching())
+@@ -87,6 +88,7 @@ function debounce(func, wait) {
+ class Hexo extends events_1.EventEmitter {
+     constructor(base = process.cwd(), args = {}) {
+         super();
++        global.hexo = this;
+         this.base_dir = base + path_1.sep;
+         this.public_dir = (0, path_1.join)(base, 'public') + path_1.sep;
+         this.source_dir = (0, path_1.join)(base, 'source') + path_1.sep;
+@@ -232,22 +234,7 @@ class Hexo extends events_1.EventEmitter {
+         }
+     }
+     loadPlugin(path, callback) {
+-        return (0, hexo_fs_1.readFile)(path).then(script => {
+-            // Based on: https://github.com/nodejs/node-v0.x-archive/blob/v0.10.33/src/node.js#L516
+-            const module = new module_1.default(path);
+-            module.filename = path;
+-            module.paths = module_1.default._nodeModulePaths(path);
+-            function req(path) {
+-                return module.require(path);
+-            }
+-            req.resolve = (request) => module_1.default._resolveFilename(request, module);
+-            req.main = require.main;
+-            req.extensions = module_1.default._extensions;
+-            req.cache = module_1.default._cache;
+-            script = `(async function(exports, require, module, __filename, __dirname, hexo){${script}\n});`;
+-            const fn = (0, vm_1.runInThisContext)(script, path);
+-            return fn(module.exports, req, module, path, (0, path_1.dirname)(path), this);
+-        }).asCallback(callback);
++        return bluebird_1.default.resolve(require(path)).asCallback(callback);
+     }
+     _showDrafts() {
+         const { args } = this.env;
+diff --git a/node_modules/hexo/dist/theme/view.js b/node_modules/hexo/dist/theme/view.js
+index 9c25d37..f136181 100644
+--- a/node_modules/hexo/dist/theme/view.js
++++ b/node_modules/hexo/dist/theme/view.js
+@@ -72,7 +72,9 @@ class View {
+         // eslint-disable-next-line @typescript-eslint/no-unused-vars
+         const _a = this.data, { layout, _content } = _a, data = __rest(_a, ["layout", "_content"]);
+         return assignIn({}, locals, data, {
+-            filename: this.source
++            filename: this.source,
++            require,
++            hexo: this._theme.context
+         });
+     }
+     _bindHelpers(locals) {

@@ -3,66 +3,99 @@ import MarkdownIt from "markdown-it";
 import MarkdownItMath from "markdown-it-math-loose";
 import MarkdownItAnchor from "markdown-it-anchor";
 import katex from "katex";
-import syntect from "@syntect/node";
+import { v4 as uuid } from "uuid";
 import { HTMLElement, NodeType, parse } from "node-html-parser";
 
+import { highlight as shikiHighlight } from "./shiki";
 import { isRelativeUrl } from "./utils";
 
-const markdownIt = new MarkdownIt({
-  html: true,
-  breaks: false,
-  linkify: true,
-  typographer: false,
-  highlight
-});
+type SyncHighlighter = (code: string, language: string) => string;
 
-function highlight(code: string, language: string) {
-  // Process [shell]-prompt highlight
-  let linePrompts: string[] = null;
-  let lineContinuation: boolean[] = null;
-  if (language.endsWith("-prompt")) {
-    // Remove prompts from input
-    const PROMPTS = ["$ ", "# "];
-    language = language.split("-").slice(0, -1).join("-");
-    const codeLines = code.split("\n");
-    linePrompts = codeLines.map(line => PROMPTS.find(prompt => line.startsWith(prompt)) || "");
-    lineContinuation = linePrompts.map(s => !!s);
-    for (let i = 1; i < lineContinuation.length; i++) {
-      if (codeLines[i - 1].endsWith("\\")) lineContinuation[i] ||= lineContinuation[i - 1];
-    }
-    code = code
-      .split("\n")
-      .map((line, i) => line.slice(linePrompts[i].length))
-      .join("\n");
-  }
+function createMarkdownIt(highlight: SyncHighlighter) {
+  const markdownIt = new MarkdownIt({
+    html: true,
+    breaks: false,
+    linkify: true,
+    typographer: false,
+    highlight
+  });
 
-  let html = syntect.highlight(code, language, "h-").html;
+  markdownIt.use(MarkdownItMath, {
+    inlineOpen: "$",
+    inlineClose: "$",
+    blockOpen: "$$",
+    blockClose: "$$",
+    inlineRenderer: (code: string) => renderMath(code, false),
+    blockRenderer: (code: string) => renderMath(code, true)
+  });
 
-  if (linePrompts) {
-    function toPlain(html: string) {
-      const d1 = parse(html);
-      if (!d1.firstChild) return html;
-      const d2 = parse("<span></span>");
-      d2.firstChild.textContent = d1.textContent;
-      return d2.innerHTML;
-    }
+  markdownIt.use(MarkdownItAnchor, {
+    permalink: MarkdownItAnchor.permalink.linkInsideHeader({
+      class: "headerlink",
+      symbol: ""
+    })
+  });
 
-    // Add the stylized prompts back with unselectable pseudo elements
-    const document = parse(html);
-    const outerSpan = document.firstChild as HTMLElement;
-    outerSpan.innerHTML = outerSpan.innerHTML
-      .split("\n")
-      .map((line, i) => {
-        if (linePrompts[i]) return `<span class="hl-sh-prompt" data-prompt="${linePrompts[i]}"></span>${line}`;
-        else if (lineContinuation[i]) return line;
-        else return toPlain(line);
-      })
-      .join("\n");
-    html = document.innerHTML;
-  }
+  markdownIt.linkify.set({ fuzzyLink: false });
 
-  return html;
+  return markdownIt;
 }
+
+const createSyncHighlighter = () => {
+  const results = new Map<string, string>();
+  const promises = new Array<Promise<unknown>>();
+  const highlight = (code: string, language: string) => {
+    const doHighlightAsync = async () => {
+      // Process [shell]-prompt highlight
+      let linePrompts: string[] = null;
+      let lineContinuation: boolean[] = null;
+      if (language.endsWith("-prompt")) {
+        // Remove prompts from input
+        const PROMPTS = ["$ ", "# "];
+        language = language.split("-").slice(0, -1).join("-");
+        const codeLines = code.split("\n");
+        linePrompts = codeLines.map(line => PROMPTS.find(prompt => line.startsWith(prompt)) || "");
+        lineContinuation = linePrompts.map(s => !!s);
+        for (let i = 1; i < lineContinuation.length; i++) {
+          if (codeLines[i - 1].endsWith("\\")) lineContinuation[i] ||= lineContinuation[i - 1];
+        }
+        code = code
+          .split("\n")
+          .map((line, i) => line.slice(linePrompts[i].length))
+          .join("\n");
+      }
+
+      let html = await shikiHighlight(code, language);
+
+      if (linePrompts) {
+        function toPlain(html: string) {
+          const d1 = parse(html);
+          if (!d1.firstChild) return html;
+          const d2 = parse("<span></span>");
+          d2.firstChild.textContent = d1.textContent;
+          return d2.innerHTML;
+        }
+
+        // Add the stylized prompts back with unselectable pseudo elements
+        return html
+          .split("\n")
+          .map((line, i) => {
+            if (linePrompts[i]) return `<span class="hl-sh-prompt" data-prompt="${linePrompts[i]}"></span>${line}`;
+            else if (lineContinuation[i]) return line;
+            else return toPlain(line);
+          })
+          .join("\n");
+      }
+
+      return html;
+    };
+
+    const id = uuid();
+    promises.push(doHighlightAsync().then(html => results.set(id, html)));
+    return `<span async-highlight-id="${id}"></span>`;
+  };
+  return Object.assign(highlight, { results, promises });
+};
 
 function renderMath(code: string, display: boolean) {
   return katex.renderToString(code, {
@@ -72,33 +105,30 @@ function renderMath(code: string, display: boolean) {
   });
 }
 
-markdownIt.use(MarkdownItMath, {
-  inlineOpen: "$",
-  inlineClose: "$",
-  blockOpen: "$$",
-  blockClose: "$$",
-  inlineRenderer: (code: string) => renderMath(code, false),
-  blockRenderer: (code: string) => renderMath(code, true)
-});
-
-markdownIt.use(MarkdownItAnchor, {
-  permalink: MarkdownItAnchor.permalink.linkInsideHeader({
-    class: "headerlink",
-    symbol: ""
-  })
-});
-
-markdownIt.linkify.set({ fuzzyLink: false });
-
 const disableNunjucks = <F>(func: F): F => Object.assign(func, { disableNunjucks: true });
 
 hexo.extend.renderer.register(
   "md",
   "html",
   disableNunjucks(async data => {
-    const document = parse(markdownIt.render(data.text), { comment: true });
+    const highlighter = createSyncHighlighter();
+    const markdownIt = createMarkdownIt(highlighter);
+    const document = parse(markdownIt.render(data.text), {
+      comment: true,
+      blockTextElements: {
+        script: true,
+        noscript: true,
+        style: true
+      }
+    });
+    await Promise.all(highlighter.promises);
 
     const createElement = (tagName: string) => parse(`<${tagName}></${tagName}>`).firstChild as HTMLElement;
+
+    document.querySelectorAll("span[async-highlight-id]").forEach(span => {
+      const id = span.getAttribute("async-highlight-id");
+      span.replaceWith(highlighter.results.get(id));
+    });
 
     // Process @2x images
     document.querySelectorAll("img").forEach(img => {

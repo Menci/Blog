@@ -11,6 +11,14 @@ import { isRelativeUrl } from "./utils";
 
 type SyncHighlighter = (code: string, language: string) => string;
 
+const escapeHtml = (text: string) =>
+  text
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+
 function createMarkdownIt(highlight: SyncHighlighter) {
   const markdownIt = new MarkdownIt({
     html: true,
@@ -71,9 +79,7 @@ const createSyncHighlighter = () => {
         function toPlain(html: string) {
           const d1 = parse(html);
           if (!d1.firstChild) return html;
-          const d2 = parse("<span></span>");
-          d2.firstChild.textContent = d1.textContent;
-          return d2.innerHTML;
+          return escapeHtml(d1.textContent);
         }
 
         // Add the stylized prompts back with unselectable pseudo elements
